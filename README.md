@@ -1,3 +1,1 @@
-# OneDaySoftware
-# hejka tu lenka
-# Ooo też moge edytować
+{\color{Golden} \emph{OneDaySoftware}}
