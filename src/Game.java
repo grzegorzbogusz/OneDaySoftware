@@ -1,4 +1,3 @@
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 
@@ -12,9 +11,13 @@ public class Game extends Canvas implements Runnable {
     private Thread thread;
     private boolean running = false;
     private int score = 0;
+    Grid grid;
+    Mole mole;
 
     public Game() {
         new Window(WIDTH, HEIGHT, "Whack a Mole", this);
+        grid = new Grid(WIDTH, HEIGHT);
+        mole = new Mole(this);
     }
 
     public synchronized void start() {
@@ -63,7 +66,7 @@ public class Game extends Canvas implements Runnable {
     }
 
     private void tick() {
-
+        mole.tick();
     }
 
     private void render() {
@@ -94,12 +97,19 @@ public class Game extends Canvas implements Runnable {
         g.drawString("Score: " + score, 20, 120);
 
         // Grid rendering
-        new Grid(WIDTH, HEIGHT).render(g);
+        grid.render(g);
 
-        // Creating a Mole
-        new Mole().render(g);
+        mole.render(g);
 
         g.dispose();
         bs.show();
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public int getScore() {
+        return score;
     }
 }
