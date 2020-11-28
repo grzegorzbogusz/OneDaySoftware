@@ -1,62 +1,21 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.Random;
 
-public class Mole extends MouseAdapter {
+public class Mole {
 
-    private ImageIcon moleImage;
-    private final int IMAGE_SIZE = 190;
-    private int currentPositionX = 0;
-    private int currentPositionY = 0;
-    private Game game;
+    private final int imageSize = 200;
 
-    public Mole(Game game) {
+    private Image moleImage;
 
-        moleImage = new ImageIcon("src\\images\\mole.jpg");
+    public Mole() {
 
-        this.game = game;
-
+        moleImage = new ImageIcon("src\\images\\mole.jpg").getImage();
+    }
+    public Image getMoleImage() {
+        return moleImage;
     }
 
-    public void tick() {
-
-    }
-
-    public void render(Graphics g) {
-
-        Random random = new Random();
-        int randomPositionX;
-        int randomPositionY;
-        do {
-            randomPositionX = (random.nextInt(3) * 200) + 350;
-            randomPositionY = (random.nextInt(3) * 200) + 180;
-        } while(currentPositionX == randomPositionX && currentPositionY == randomPositionY);
-
-        currentPositionX = randomPositionX;
-        currentPositionY = randomPositionY;
-
-        g.drawImage(moleImage.getImage(), currentPositionX, currentPositionY, IMAGE_SIZE, IMAGE_SIZE, null);
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        int mx = e.getX();
-        int my = e.getY();
-        if(mouseOver(mx, my, currentPositionX, currentPositionY, IMAGE_SIZE)) game.setScore(game.getScore() + 1);
-    }
-
-
-    private boolean mouseOver(int mx, int my, int x, int y, int size) {
-        if(mx > x && mx < x + size) {
-            return my > y && my < y + size;
-        } return false;
+    public int getImageSize() {
+        return imageSize;
     }
 }

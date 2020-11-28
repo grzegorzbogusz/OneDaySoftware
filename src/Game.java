@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.util.Random;
 
 
 public class Game extends Canvas implements Runnable {
@@ -11,13 +12,12 @@ public class Game extends Canvas implements Runnable {
     private Thread thread;
     private boolean running = false;
     private int score = 0;
-    Grid grid;
-    Mole mole;
+    private Grid grid;
 
     public Game() {
         new Window(WIDTH, HEIGHT, "Whack a Mole", this);
         grid = new Grid(WIDTH, HEIGHT);
-        mole = new Mole(this);
+
     }
 
     public synchronized void start() {
@@ -98,8 +98,7 @@ public class Game extends Canvas implements Runnable {
 
         // Grid rendering
         grid.render(g);
-
-        mole.render(g);
+        addMouseListener(new Handler(grid.getSquares()));
 
         g.dispose();
         bs.show();
