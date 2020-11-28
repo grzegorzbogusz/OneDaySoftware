@@ -1,15 +1,12 @@
-import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 
 public class Mole extends MouseAdapter {
 
-    private BufferedImage moleImage;
+    private ImageIcon moleImage;
     private final int IMAGE_SIZE = 190;
     private int currentPositionX = 0;
     private int currentPositionY = 0;
@@ -17,17 +14,18 @@ public class Mole extends MouseAdapter {
 
     public Mole(Game game) {
 
-        try {
-            moleImage = ImageIO.read(new File("C:\\Users\\user\\Desktop\\OneDaySoftware\\src\\images\\mole.jpg"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        moleImage = new ImageIcon("src\\images\\mole.jpg");
 
         this.game = game;
 
     }
 
     public void tick() {
+
+    }
+
+    public void render(Graphics g) {
+
         Random random = new Random();
         int randomPositionX;
         int randomPositionY;
@@ -38,14 +36,11 @@ public class Mole extends MouseAdapter {
 
         currentPositionX = randomPositionX;
         currentPositionY = randomPositionY;
-    }
 
-    public void render(Graphics g) {
-
-        g.drawImage(moleImage, currentPositionX, currentPositionY, IMAGE_SIZE, IMAGE_SIZE, null);
+        g.drawImage(moleImage.getImage(), currentPositionX, currentPositionY, IMAGE_SIZE, IMAGE_SIZE, null);
 
         try {
-            Thread.sleep(500);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -55,7 +50,6 @@ public class Mole extends MouseAdapter {
     public void mousePressed(MouseEvent e) {
         int mx = e.getX();
         int my = e.getY();
-        System.out.println(mx + "|" + my);
         if(mouseOver(mx, my, currentPositionX, currentPositionY, IMAGE_SIZE)) game.setScore(game.getScore() + 1);
     }
 

@@ -66,7 +66,7 @@ public class Game extends Canvas implements Runnable {
     }
 
     private void tick() {
-        mole.tick();
+
     }
 
     private void render() {
