@@ -1,114 +1,94 @@
+import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferStrategy;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Random;
 
-
-public class Game extends Canvas implements Runnable {
+public class Game extends JFrame implements ActionListener{
 
     private final int WIDTH = 1280;
     private final int HEIGHT = WIDTH / 12 * 9;
+    private final int SQUARE_SIDE_SIDE = 200;
 
-
-    private Thread thread;
-    private boolean running = false;
+    private JButton[] buttons;
+    private ImageIcon mole;
+    private int currentMolePosition;
+    private JLabel scoreLabel;
     private int score = 0;
-    private Grid grid;
 
     public Game() {
-        new Window(WIDTH, HEIGHT, "Whack a Mole", this);
-        grid = new Grid(WIDTH, HEIGHT);
+        // Creating a window
+        setTitle("Whack a Mole");
+        setSize(WIDTH, HEIGHT);
+        setResizable(false);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setVisible(true);
 
+        JPanel panel = new JPanel();
+        panel.setBounds(0, 0,WIDTH, HEIGHT);
+        panel.setLayout(null);
+        buttons = new JButton[9];
+
+        JLabel welcomeMessage = new JLabel("Whack a Mole");
+        welcomeMessage.setFont(new Font("Arial", Font.BOLD, 48));
+        welcomeMessage.setBounds(500, 25, 400, 100);
+        panel.add(welcomeMessage);
+
+        scoreLabel = new JLabel("Score: " + score);
+        scoreLabel.setFont(new Font("Arial", Font.BOLD, 32));
+        scoreLabel.setBounds(20, 100, 200, 50);
+        panel.add(scoreLabel);
+
+        mole = new ImageIcon("src\\images\\mole.jpg");
+
+       int index = 0;
+       for(int i = 0; i < 3; i++) {
+           for(int j = 0; j < 3; j++) {
+               int x = (i * SQUARE_SIDE_SIDE) + WIDTH/2 - (SQUARE_SIDE_SIDE + SQUARE_SIDE_SIDE/2);
+               int y = (j * SQUARE_SIDE_SIDE) + HEIGHT/2 - (SQUARE_SIDE_SIDE + SQUARE_SIDE_SIDE/2);
+               buttons[index] = new JButton();
+               buttons[index].setBounds(x, y, 200, 200);
+               buttons[index].setBackground(Color.WHITE);
+               panel.add(buttons[index]);
+               buttons[index].addActionListener(this);
+               index++;
+           }
+       }
+        add(panel);
+
+       while(true) {
+           getRandomMolePosition();
+           try {
+               Thread.sleep(500);
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+       }
     }
 
-    public synchronized void start() {
-        thread = new Thread(this);
-        thread.start();
-        running = true;
-    }
-
-    public synchronized void stop() {
-        try {
-            thread.join();
-            running = false;
-        } catch(Exception e) {
-            e.printStackTrace();
+    private void getRandomMolePosition() {
+        for(JButton button : buttons) {
+            button.setIcon(null);
         }
+
+        Random random = new Random();
+        int n;
+        do {
+            n = random.nextInt(9);
+        } while(n == currentMolePosition);
+        buttons[n].setIcon(mole);
+        currentMolePosition = n;
     }
 
     @Override
-    public void run() {
-        long lastTime = System.nanoTime();
-        double amountOfTicks = 60.0;
-        double ns = 1000000000 / amountOfTicks;
-        double delta = 0;
-        long timer = System.currentTimeMillis();
-        int frames = 0;
-        while(running) {
-            long now = System.nanoTime();
-            delta += (now - lastTime) / ns;
-            lastTime = now;
-            while(delta >= 1) {
-                tick();
-                delta--;
-            }
-            if(running) {
-                render();
-            }
-            frames++;
+    public void actionPerformed(ActionEvent e) {
 
-            if(System.currentTimeMillis() - timer > 1000) {
-                timer += 1000;
-                System.out.println("FPS: " + frames);
-                frames = 0;
-            }
+        JButton button = (JButton) e.getSource();
+        if(button.getIcon() == mole) {
+            button.setIcon(null);
+            score++;
+            scoreLabel.setText("Score: " + score);
         }
-        stop();
-    }
-
-    private void tick() {
-
-    }
-
-    private void render() {
-        BufferStrategy bs = this.getBufferStrategy();
-        if(bs == null) {
-            this.createBufferStrategy(3);
-            return;
-        }
-
-        Graphics g = bs.getDrawGraphics();
-
-        // Background creating
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, WIDTH, HEIGHT);
-
-        // Creating a main title "Whack a mole"
-        g.setColor(Color.BLACK);
-        Font titleFont = new Font("Arial", Font.BOLD, 48);
-        g.setFont(titleFont);
-        FontMetrics metrics = g.getFontMetrics(titleFont);
-
-        String title = "Whack a Mole";
-        g.drawString(title, WIDTH/2 - metrics.stringWidth(title)/2, 50);
-
-        // Creating a score text
-        Font scoreFont = new Font("Arial", Font.BOLD, 24);
-        g.setFont(scoreFont);
-        g.drawString("Score: " + score, 20, 120);
-
-        // Grid rendering
-        grid.render(g);
-        addMouseListener(new Handler(grid.getSquares()));
-
-        g.dispose();
-        bs.show();
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    public int getScore() {
-        return score;
     }
 }
