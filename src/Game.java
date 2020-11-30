@@ -7,17 +7,24 @@ import java.util.Random;
 public class Game extends JFrame implements ActionListener{
 
     private final int WIDTH = 1280;
-    private final int HEIGHT = WIDTH / 12 * 9;
+    private final int HEIGHT = 800;
     private final int SQUARE_SIDE_SIDE = 200;
 
-    private JButton[] buttons;
-    private ImageIcon mole;
     private int currentMolePosition;
-    private JLabel scoreLabel;
     private int score = 0;
+    private JButton[] buttons;
+
+    private ImageIcon mole;
+
+    private JLabel scoreLabel;
+    private JLabel welcomeMessage;
+
+    private JPanel panel;
 
     public Game() {
-        // Creating a window
+
+        setUndecorated(false);
+
         setTitle("Whack a Mole");
         setSize(WIDTH, HEIGHT);
         setResizable(false);
@@ -25,12 +32,11 @@ public class Game extends JFrame implements ActionListener{
         setLocationRelativeTo(null);
         setVisible(true);
 
-        JPanel panel = new JPanel();
+        panel = new JPanel();
         panel.setBounds(0, 0,WIDTH, HEIGHT);
         panel.setLayout(null);
-        buttons = new JButton[9];
 
-        JLabel welcomeMessage = new JLabel("Whack a Mole");
+        welcomeMessage = new JLabel("Whack a Mole");
         welcomeMessage.setFont(new Font("Arial", Font.BOLD, 48));
         welcomeMessage.setBounds(500, 25, 400, 100);
         panel.add(welcomeMessage);
@@ -40,11 +46,15 @@ public class Game extends JFrame implements ActionListener{
         scoreLabel.setBounds(20, 100, 200, 50);
         panel.add(scoreLabel);
 
-        mole = new ImageIcon("src\\images\\mole.jpg");
+        mole = new ImageIcon("src\\images\\mole.png");
 
-       int index = 0;
-       for(int i = 0; i < 3; i++) {
-           for(int j = 0; j < 3; j++) {
+        buttons = new JButton[9];
+        int index = 0;
+
+        for(int i = 0; i < 3; i++)
+        {
+           for(int j = 0; j < 3; j++)
+           {//ENCAPSULATION REQUIRED
                int x = (i * SQUARE_SIDE_SIDE) + WIDTH/2 - (SQUARE_SIDE_SIDE + SQUARE_SIDE_SIDE/2);
                int y = (j * SQUARE_SIDE_SIDE) + HEIGHT/2 - (SQUARE_SIDE_SIDE + SQUARE_SIDE_SIDE/2);
                buttons[index] = new JButton();
@@ -60,12 +70,13 @@ public class Game extends JFrame implements ActionListener{
        while(true) {
            getRandomMolePosition();
            try {
-               Thread.sleep(500);
+               Thread.sleep(500 - score*3);
            } catch (InterruptedException e) {
                e.printStackTrace();
            }
        }
     }
+
 
     private void getRandomMolePosition() {
         for(JButton button : buttons) {
@@ -83,7 +94,6 @@ public class Game extends JFrame implements ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         JButton button = (JButton) e.getSource();
         if(button.getIcon() == mole) {
             button.setIcon(null);
