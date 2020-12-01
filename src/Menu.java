@@ -1,8 +1,10 @@
+import Interfaces.MenuInterface;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class Menu extends JFrame implements Interfaces.Menu {
+public class Menu extends JFrame implements MenuInterface {
 
     private final int WIDTH = 1280;
     private final int HEIGHT = 800;
@@ -12,20 +14,19 @@ public class Menu extends JFrame implements Interfaces.Menu {
     private final JButton exitButton;
 
     private JLabel title;
-
     private JPanel panel;
 
 
     public Menu(){
 
-        setUndecorated(true);
+        this.setUndecorated(true);
 
-        setTitle("Menu");
-        setSize(WIDTH, HEIGHT);
-        setResizable(false);
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setVisible(true);
+        this.setTitle("Menu");
+        this.setSize(WIDTH, HEIGHT);
+        this.setResizable(false);
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.setLocationRelativeTo(null);
+
 
         panel = new JPanel();
         panel.setBounds(0,0, WIDTH, HEIGHT);
@@ -68,25 +69,26 @@ public class Menu extends JFrame implements Interfaces.Menu {
         panel.add(exitButton);
 
         add(panel);
-
+        this.setVisible(true);
     }
 
 
     @Override
     public void Start() {
-        dispose();
+        this.dispose();
         new Game();
     }
 
     @Override
     public void Credits() {
-        dispose();
+        this.dispose();
         new Credits();
 
     }
 
     @Override
     public void Exit() {
+        this.dispose();
         System.exit(0);
     }
 

@@ -16,13 +16,13 @@ public class Credits extends JFrame implements ActionListener {
 
     public Credits(){
 
-        setUndecorated(true);
+        this.setUndecorated(true);
 
-        setTitle("Credits");
-        setSize(WIDTH,HEIGHT);
-        setResizable(false);
-        setLocationRelativeTo(null);
-        setVisible(true);
+        this.setTitle("Credits");
+        this.setSize(WIDTH,HEIGHT);
+        this.setResizable(false);
+        this.setLocationRelativeTo(null);
+
 
         panel = new JPanel();
         panel.setBounds(0,0, WIDTH, HEIGHT);
@@ -57,13 +57,14 @@ public class Credits extends JFrame implements ActionListener {
         panel.add(goBack);
 
         add(panel);
+        this.setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == goBack)
         {
-            dispose();
+            this.dispose();
             new Menu();
         }
     }

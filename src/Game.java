@@ -30,7 +30,7 @@ public class Game extends JFrame implements ActionListener{
         setResizable(false);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setVisible(true);
+
 
         panel = new JPanel();
         panel.setBounds(0, 0,WIDTH, HEIGHT);
@@ -54,7 +54,7 @@ public class Game extends JFrame implements ActionListener{
         for(int i = 0; i < 3; i++)
         {
            for(int j = 0; j < 3; j++)
-           {//ENCAPSULATION REQUIRED
+           {
                int x = (i * SQUARE_SIDE_SIDE) + WIDTH/2 - (SQUARE_SIDE_SIDE + SQUARE_SIDE_SIDE/2);
                int y = (j * SQUARE_SIDE_SIDE) + HEIGHT/2 - (SQUARE_SIDE_SIDE + SQUARE_SIDE_SIDE/2);
                buttons[index] = new JButton();
@@ -65,7 +65,9 @@ public class Game extends JFrame implements ActionListener{
                index++;
            }
        }
+
         add(panel);
+        setVisible(true);
 
        while(true) {
            getRandomMolePosition();
