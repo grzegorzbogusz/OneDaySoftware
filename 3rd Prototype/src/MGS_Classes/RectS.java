@@ -21,7 +21,8 @@ public class RectS extends JComponent implements MouseListener {
     private int moleX = 0;
     private int moleY = 0;
     private int score = 0;
-    private int period = 2*200;
+    private int period = 2*1000;
+    Random rand = new Random();
 
     private int[]positions = new int[3];
 
@@ -39,18 +40,21 @@ public class RectS extends JComponent implements MouseListener {
             @Override
             public void run() {
 
-                Random rand = new Random();
-
-                positions[0] = leftX+DEFAULT_WIDTH*0;
+                positions[0] = leftX;
                 positions[1] = leftX+DEFAULT_WIDTH*1;
                 positions[2] = leftX+DEFAULT_WIDTH*2;
 
                 moleX=positions[rand.nextInt(3)];
                 moleY=positions[rand.nextInt(3)];
                 repaint();
-                period -= score;
+                if(score==50) {
+                    this.cancel();
+                    period = 200;
+                    score++;
+                    startGame();
+                }
             }
-        }, 2*100, period);
+        }, 10, period);
     }
 
     @Override
@@ -88,6 +92,13 @@ public class RectS extends JComponent implements MouseListener {
 
         if(e.getX()>moleX && e.getX()<=(moleX+100) && e.getY()>moleY && e.getY()<=(moleY+100)) {
             this.score += 5;
+
+            positions[0] = leftX+DEFAULT_WIDTH*0;
+            positions[1] = leftX+DEFAULT_WIDTH*1;
+            positions[2] = leftX+DEFAULT_WIDTH*2;
+
+            moleX=positions[rand.nextInt(3)];
+            moleY=positions[rand.nextInt(3)];
             repaint();
         }
 
