@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,15 +26,26 @@ public class RectS extends JComponent implements MouseListener {
     private int period = 2*1000;
     Random rand = new Random();
 
-    private int[]positions = new int[3];
+    boolean s;
 
+    Rectangle2D current = new Rectangle2D.Double(10, 10, 10, 10);
+
+    private int[]positions = new int[3];
+    private ArrayList<Rectangle2D> rectangles;
+
+    Rectangle r = new Rectangle(20, 20, 20, 20);
     Timer timer = new Timer();
 
-    Image moleImage = new ImageIcon("src\\mole.jpg").getImage();
+    Image moleImage = new ImageIcon("src\\sample.gif").getImage();
+    Image bg = new ImageIcon("src\\forest.jpg").getImage();
+    Image b = new ImageIcon("src\\sample.gif").getImage();
 
     public RectS() {
+
+        rectangles = new ArrayList<>();
         addMouseListener(this);
         startGame();
+
     }
 
     public void startGame() {
@@ -53,12 +66,30 @@ public class RectS extends JComponent implements MouseListener {
                     score++;
                     startGame();
                 }
+                if(s==true) {
+                    this.cancel();
+                    period = 1000;
+                    score++;
+                    s = false;
+                    startGame();
+                }
             }
         }, 10, period);
     }
 
     @Override
     public void paintComponent(Graphics g) {
+
+
+        g.drawImage(moleImage, 20, 20, 20, 20, null);
+        rectangles.add(current);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.draw(current);
+
+        if(score>50) {
+        }
+
+        ((Graphics2D) g).draw(r);
 
         for(int i=0; i<=2; i++) {
             topY+=DEFAULT_WIDTH*i;
@@ -73,24 +104,25 @@ public class RectS extends JComponent implements MouseListener {
         Font f = new Font("Serif", Font.BOLD, 36);
         Font f1 = new Font("Serif", Font.BOLD, 20);
 
+      g.drawImage(bg, 0, 0, null);
         g.setFont(f);
         g.drawString("WHACK A MOLE", 180, 100);
         g.setFont(f1);
         g.drawString("Score: "+score,50, 600 );
-        g.drawImage(moleImage, moleX, moleY, 99, 99, null);
+        g.drawImage(moleImage, moleX, moleY, 99, 99, this);
+        //g.drawImage(b, 0, 0, null);
 
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
 
-
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
 
-        if(e.getX()>moleX && e.getX()<=(moleX+100) && e.getY()>moleY && e.getY()<=(moleY+100)) {
+       if(e.getX()>moleX && e.getX()<=(moleX+100) && e.getY()>moleY && e.getY()<=(moleY+100)) {
             this.score += 5;
 
             positions[0] = leftX+DEFAULT_WIDTH*0;
@@ -101,6 +133,11 @@ public class RectS extends JComponent implements MouseListener {
             moleY=positions[rand.nextInt(3)];
             repaint();
         }
+
+       if(r.contains(e.getPoint())) {
+           s = true;
+           repaint();
+       }
 
     }
 

@@ -1,6 +1,7 @@
 package MGS_Classes;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * The basement for all components;
