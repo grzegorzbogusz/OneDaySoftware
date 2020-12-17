@@ -19,7 +19,7 @@ public class Mole {
 
     Mole() {
         rectangle = new Rectangle(x, y, 99, 99);
-        moleImage = new ImageIcon("src\\Images\\mole.gif").getImage();
+        moleImage = new ImageIcon("src\\Images\\background.png").getImage();
     }
 
     public Image getMoleImage() {
