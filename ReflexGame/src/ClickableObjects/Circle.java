@@ -1,17 +1,19 @@
 package ClickableObjects;
 
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
 
 public class Circle extends Figure {
 
     public Circle(Color color, int width, int height) {
         super(color, width, height);
+        this.shape = new Rectangle(getRandomNumber(500), getRandomNumber(500), this.width, this.height);
     }
 
-    public Shape getShape() {
-        return new Ellipse2D.Double(50, 50, width, height);
-    }
+    @Override
+    public Shape getShape() { return this.shape; }
+
+    @Override
+    public Color getColor() { return this.color; }
 
     @Override
     public boolean isPositive() {

@@ -1,12 +1,15 @@
 package Game;
 
+import ClickableObjects.Circle;
+import ClickableObjects.Figure;
+import ClickableObjects.Square;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -51,16 +54,22 @@ import java.util.Random;
 
 public class GameComponent extends JComponent implements ActionListener {
 
-    protected ArrayList<Shape> shapes = new ArrayList<>();
-    protected ArrayList<Shape> unvisible = new ArrayList<>();
-    protected Shape current; //the clicked shape
+    //protected ArrayList<Shape> shapes = new ArrayList<>();
+    protected ArrayList<Figure> unvisible;
+
+    protected ArrayList<Figure> figures;
+
+    protected Figure current; //the clicked shape
     protected int score=0;
     protected int tick = 0;
 
-    private int delay=1000;
+    private int delay=500;
+    private int delay2 = 1000;
     private Timer timer;
 
     public GameComponent() {
+        figures = new ArrayList<>();
+        unvisible = new ArrayList<>();
         timer = new Timer(delay, this);
         addMouseListener(new MouseComponent());
         startGame(); //the main timer adds new shapes on the screen with specific delay
@@ -79,12 +88,12 @@ public class GameComponent extends JComponent implements ActionListener {
         Font font = new Font("Serif", Font.BOLD, 20);
         graphics2D.setFont(font);
         graphics2D.drawString("Score: "+score, 10, 50);
-        graphics2D.setColor(Color.BLUE);
-        for(Shape shape : shapes) {
-            graphics2D.fill(shape);
-            graphics2D.draw(shape);
-            graphics2D.setColor(Color.RED);
-            graphics2D.drawString(""+shapes.indexOf(shape), (int)shape.getBounds().getX(), (int)shape.getBounds().getY());
+        graphics2D.setColor(Color.BLACK);
+        for(Figure shape : figures) {
+            graphics2D.setColor(shape.getColor());
+            graphics2D.fill(shape.getShape());
+            graphics2D.draw(shape.getShape());
+            //graphics2D.drawString(""+figures.indexOf(shape), (int)shape.getShape().getBounds().getX(), (int)shape.getShape().getBounds().getY());
         }
     }
 
@@ -95,8 +104,8 @@ public class GameComponent extends JComponent implements ActionListener {
 
     public void rollShapes() {
         unvisible.clear();
-        unvisible.add(new Rectangle(getRandomNumber(500), getRandomNumber(500), 100, 100));
-        unvisible.add(new Ellipse2D.Double(getRandomNumber(500), getRandomNumber(500), 100, 100));
+        unvisible.add(new Square(Color.BLUE, 50,50));
+        unvisible.add(new Circle(Color.RED, 50,50));
     }
 
     public int getRandomNumber(int limit) {
@@ -104,24 +113,24 @@ public class GameComponent extends JComponent implements ActionListener {
         return random.nextInt(limit);
     }
 
-    public Shape find(Point p) {
-        for(Shape shape : shapes) {
-            if(shape.contains(p)) return shape;
+    public Figure find(Point p) {
+        for(Figure shape : figures) {
+            if(shape.getShape().contains(p)) return shape;
         }
         return null;
     }
 
-    public void removeShape(Shape s) {
+    public void removeShape(Figure s) {
         if(s==null) return;
         if(s==current) current = null;
-        shapes.remove(s);
+        figures.remove(s);
         repaint();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         rollShapes(); //take new shapes with new x & y;
-        shapes.add(unvisible.get(getRandomNumber(2))); //add one of them to the main ArrayList of shapes
+        figures.add(unvisible.get(getRandomNumber(2))); //add one of them to the main ArrayList of shapes
         repaint();
     }
 
@@ -131,8 +140,12 @@ public class GameComponent extends JComponent implements ActionListener {
         public void mousePressed(MouseEvent e) {
             current = find(e.getPoint());
             if(current!=null) {
-                removeShape(current);
+                delay-=10;
+                if(delay<=200)
+                    delay=200;
+                timer.setDelay(delay);
                 score+=5;
+                removeShape(current);
             }
         }
 
@@ -142,15 +155,15 @@ public class GameComponent extends JComponent implements ActionListener {
 
         Timer deleter; //idc of encapsulation, the program is like a rough concept sketch
         ShapesDeleter() {
-            deleter = new Timer(4500, this);
+            deleter = new Timer(delay2, this);
             deleter.start();
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(shapes.get(shapes.size()-3)!=null) {
-                shapes.remove(shapes.size()-3); //it throws an error if you delete the specific shape with a click
-                shapes.trimToSize();
+            if(figures.isEmpty()==false) {
+                figures.remove(0); //it throws an error if you delete the specific shape with a click
+                figures.trimToSize();
             }
             repaint();
         }

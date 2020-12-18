@@ -1,5 +1,7 @@
 package ClickableObjects;
 
+import Game.GameComponent;
+
 import java.awt.*;
 import java.util.Random;
 
@@ -14,10 +16,15 @@ abstract public class Figure {
         this.color = color;
         this.width = width;
         this.height = height;
-
     }
 
-    public abstract boolean isPositive();
     public abstract Shape getShape();
+    public abstract Color getColor();
+    public abstract boolean isPositive();
+
+    public int getRandomNumber(int limit) {
+        Random random = new Random();
+        return random.nextInt(limit);
+    }
 
 }
