@@ -1,12 +1,13 @@
 package ClickableObjects;
 
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 
 public class Circle extends Figure {
 
     public Circle(Color color, int width, int height) {
         super(color, width, height);
-        this.shape = new Rectangle(getRandomNumber(500), getRandomNumber(500), this.width, this.height);
+        this.shape = new Ellipse2D.Double(getRandomNumber(500), getRandomNumber(500), this.width, this.height);
     }
 
     @Override
@@ -17,7 +18,10 @@ public class Circle extends Figure {
 
     @Override
     public boolean isPositive() {
-        return true;
+        if(this.color==Color.BLUE)
+            return true;
+        else
+            return false;
     }
 
 }

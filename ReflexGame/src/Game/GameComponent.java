@@ -13,71 +13,43 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Random;
 
-/**
- * @WARNING
- * THIS IS KIND OF CONCEPT PROGRAM
- * PLEASE DON'T GET IT SERIOUSLY
- * AND DO NOT HARRAS ME FOR SOME SOLUTIONS!
- * I HOPE YOU'LL GET THE CONCEPT
- */
-
-/**
- * @logbook
- * 22:45 - these shape classes are... useless;
- * @score: OneDay Software 0:1 Java
- * 23:01 - the whole objectivity has been lost;
- * @score: OneDay Software 0:2 Java;
- * 23:30 - it's even difficult to add these shapes correctly...
- * @score: OneDay Software 0:3 Java;
- * 23:35 - After the first half
- * OneDay Software has been verified by a simple game
- * and it lost to java 0:3 so
- * the PHP-team is almost fully confident of the win in the programming contest;
- * 00:00 - WHOOOOA, such a fast response! Shapes has been added correctly!
- * but is only a honorable goal at the moment;
- * @score: OneDay Software 1:3 Java;
- * 00:07 - GOAL! OneDay Software can't be happy of
- * chasing a score with a simple game in Java if
- * they want to conquer the PHP-Team but
- * ArrayList of Shapes finally doesn't throw an error!
- * @score: OneDay Software 2:3 Java;
- * 00:10 IT SHOULD HAVE LOOK LIKE THIS FROM THE BEGINNING!
- * @score: OneDay Software 3:3 Java;
- * 00:18 WHAT THE F*CK IS GOING ON THERE!?!??!?!?!!
- * CO TAM SIĘ DZIEJE???????????????!!!!!!!!!!!!!!!
- * sdjdshdsadshkjsaHGSHFGFDJG!JKG!HJGJHQKFGHJSGHKJDSHJSGKSJ
- * vbgjvchc
- * vcvc
- * xvcCVxnmn
- * @final_score: OneDay Software 4:3 Java;
- */
-
 public class GameComponent extends JComponent implements ActionListener {
 
-    //protected ArrayList<Shape> shapes = new ArrayList<>();
-    protected ArrayList<Figure> unvisible;
+    private final ArrayList<Figure> invisible;
+    private ArrayList<Figure> figures;
+    private Color[] colors = {Color.BLUE, Color.RED};
 
-    protected ArrayList<Figure> figures;
+    private Figure current;
+    private Rectangle rectangle = new Rectangle(250, 280, 100, 25);
+    private Player player;
 
-    protected Figure current; //the clicked shape
-    protected int score=0;
-    protected int tick = 0;
+    private int delay;
+    private int deleterDelay;
 
-    private int delay=500;
-    private int delay2 = 1000;
     private Timer timer;
+    private ShapesDeleter shapesDeleter;
 
     public GameComponent() {
-        figures = new ArrayList<>();
-        unvisible = new ArrayList<>();
-        timer = new Timer(delay, this);
         addMouseListener(new MouseComponent());
-        startGame(); //the main timer adds new shapes on the screen with specific delay
-        new ShapesDeleter(); //another timer that delete shapes with its own delay
+
+        figures = new ArrayList<>();
+        invisible = new ArrayList<>();
+
+        delay = 1000;
+        deleterDelay = 1300;
+
+        timer = new Timer(delay, this);
+        shapesDeleter = new ShapesDeleter();
+
+        player = new Player();
+        startGame();
     }
 
     private void startGame() {
+        player.resetStats();
+        figures.clear();
         timer.start();
+        shapesDeleter.getDeleter().start();
     }
 
     @Override
@@ -87,50 +59,70 @@ public class GameComponent extends JComponent implements ActionListener {
 
         Font font = new Font("Serif", Font.BOLD, 20);
         graphics2D.setFont(font);
-        graphics2D.drawString("Score: "+score, 10, 50);
-        graphics2D.setColor(Color.BLACK);
-        for(Figure shape : figures) {
-            graphics2D.setColor(shape.getColor());
-            graphics2D.fill(shape.getShape());
-            graphics2D.draw(shape.getShape());
-            //graphics2D.drawString(""+figures.indexOf(shape), (int)shape.getShape().getBounds().getX(), (int)shape.getShape().getBounds().getY());
+
+        if(timer.isRunning()) {
+            graphics2D.drawString("Score: " + player.getScore(), 10, 50);
+            for (Figure shape : figures) {
+                graphics2D.setColor(shape.getColor());
+                graphics2D.fill(shape.getShape());
+                graphics2D.draw(shape.getShape());
+            }
+        } else {
+            graphics2D.drawString("GAME OVER", 250, 250);
+            graphics2D.draw(rectangle);
+            graphics2D.drawString("start again", 250, 300);
+            graphics2D.drawString("record: "+player.getRecord(), 250, 325);
         }
     }
 
-    /**
-     * @rollShapes:
-     * adds new shapes with random x & y to the 'unvisible' ArrayList
-     */
-
-    public void rollShapes() {
-        unvisible.clear();
-        unvisible.add(new Square(Color.BLUE, 50,50));
-        unvisible.add(new Circle(Color.RED, 50,50));
+    private void rollShapes() {
+        invisible.clear();
+        invisible.add(new Square(getRandomColor(), 50,50));
+        invisible.add(new Circle(getRandomColor(), 50,50));
     }
 
-    public int getRandomNumber(int limit) {
+    private int getRandomNumber(int limit) {
         Random random = new Random();
         return random.nextInt(limit);
     }
 
-    public Figure find(Point p) {
+    private Color getRandomColor() {
+        return colors[getRandomNumber(2)];
+    }
+
+    private Figure find(Point p) {
         for(Figure shape : figures) {
             if(shape.getShape().contains(p)) return shape;
         }
         return null;
     }
 
-    public void removeShape(Figure s) {
+    private void removeShape(Figure s) {
         if(s==null) return;
         if(s==current) current = null;
         figures.remove(s);
         repaint();
     }
 
+    private void reduceDelays() {
+        delay -= 10;
+        deleterDelay -= 10;
+        if (delay <= 200)
+            delay = 200;
+        timer.setDelay(delay);
+        if (deleterDelay <= 250)
+            deleterDelay = 250;
+        shapesDeleter.deleter.setDelay(deleterDelay);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        rollShapes(); //take new shapes with new x & y;
-        figures.add(unvisible.get(getRandomNumber(2))); //add one of them to the main ArrayList of shapes
+        this.rollShapes();
+        figures.add(invisible.get(getRandomNumber(2)));
+        if(player.getMisses()>=10) {
+            this.timer.stop();
+            this.shapesDeleter.getDeleter().stop();
+        }
         repaint();
     }
 
@@ -138,31 +130,43 @@ public class GameComponent extends JComponent implements ActionListener {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            current = find(e.getPoint());
-            if(current!=null) {
-                delay-=10;
-                if(delay<=200)
-                    delay=200;
-                timer.setDelay(delay);
-                score+=5;
-                removeShape(current);
+            if(timer.isRunning()) {
+                current = find(e.getPoint());
+                if (current != null) {
+                    if (current.isPositive()) {
+                        player.setScore(5);
+                    }
+                    else
+                        player.setScore(-5);
+                        player.setNewRecord();
+                    reduceDelays();
+                    removeShape(current);
+                } else
+                    player.countMisses();
+            } else if(rectangle.contains(e.getPoint())) {
+                startGame();
+                repaint();
             }
         }
-
     }
 
     public class ShapesDeleter implements ActionListener {
 
-        Timer deleter; //idc of encapsulation, the program is like a rough concept sketch
-        ShapesDeleter() {
-            deleter = new Timer(delay2, this);
+        private Timer deleter;
+
+        public ShapesDeleter() {
+            deleter = new Timer(deleterDelay, this);
             deleter.start();
+        }
+
+        public Timer getDeleter() {
+            return this.deleter;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             if(figures.isEmpty()==false) {
-                figures.remove(0); //it throws an error if you delete the specific shape with a click
+                figures.remove(0);
                 figures.trimToSize();
             }
             repaint();

@@ -17,7 +17,10 @@ public class Square extends Figure {
 
     @Override
     public boolean isPositive() {
-        return true;
+        if(this.color==Color.BLUE)
+            return true;
+        else
+            return false;
     }
 
 }
