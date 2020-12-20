@@ -15,23 +15,26 @@ import java.util.Random;
 
 public class GameComponent extends JComponent implements ActionListener {
 
-    private final ArrayList<Figure> invisible;
-    private ArrayList<Figure> figures;
-    private Color[] colors = {Color.BLUE, Color.RED};
+    private ArrayList<Figure> figures; //list with figures to draw taken from 'invisible'
+    private ArrayList<Figure> invisible; //additional list with possible types of figures to draw
 
-    private Figure current;
-    private Rectangle rectangle = new Rectangle(250, 280, 100, 25);
+    private final Color[] colors = {Color.BLUE, Color.RED};
+    private final Rectangle button;
+
+    private Figure current; //currently clicked figure
+
     private Player player;
 
     private int delay;
     private int deleterDelay;
 
     private Timer timer;
-    private ShapesDeleter shapesDeleter;
+    private Timer deleter;
 
     public GameComponent() {
         addMouseListener(new MouseComponent());
 
+        button = new Rectangle(250, 280, 100, 25);
         figures = new ArrayList<>();
         invisible = new ArrayList<>();
 
@@ -39,7 +42,7 @@ public class GameComponent extends JComponent implements ActionListener {
         deleterDelay = 1300;
 
         timer = new Timer(delay, this);
-        shapesDeleter = new ShapesDeleter();
+        deleter = new Timer(deleterDelay, event -> initDeleter());
 
         player = new Player();
         startGame();
@@ -49,8 +52,13 @@ public class GameComponent extends JComponent implements ActionListener {
         player.resetStats();
         figures.clear();
         timer.start();
-        shapesDeleter.getDeleter().start();
+        deleter.start();
     }
+
+    /**
+     * responsible for drawing every component
+     * @param g draw every component (required by definition)
+     */
 
     @Override
     public void paintComponent(Graphics g) {
@@ -69,11 +77,16 @@ public class GameComponent extends JComponent implements ActionListener {
             }
         } else {
             graphics2D.drawString("GAME OVER", 250, 250);
-            graphics2D.draw(rectangle);
+            graphics2D.draw(button);
             graphics2D.drawString("start again", 250, 300);
             graphics2D.drawString("record: "+player.getRecord(), 250, 325);
         }
     }
+
+    /**
+     * clear the invisible list
+     * add Figure objects with new colors and
+     */
 
     private void rollShapes() {
         invisible.clear();
@@ -81,14 +94,29 @@ public class GameComponent extends JComponent implements ActionListener {
         invisible.add(new Circle(getRandomColor(), 50,50));
     }
 
+    /**
+     * return random number
+     * @param limit defines the range of random number
+     */
+
     private int getRandomNumber(int limit) {
         Random random = new Random();
         return random.nextInt(limit);
     }
 
+    /**
+     *
+     * @return random color from 'color' array
+     */
+
     private Color getRandomColor() {
         return colors[getRandomNumber(2)];
     }
+
+    /**
+     * find figure which contains the clicked point in its area
+     * @param p point the method is looking for
+     */
 
     private Figure find(Point p) {
         for(Figure shape : figures) {
@@ -97,12 +125,21 @@ public class GameComponent extends JComponent implements ActionListener {
         return null;
     }
 
+    /**
+     * remove the figure if clicked area isn't empty
+     * @param s currently clicked figure
+     */
+
     private void removeShape(Figure s) {
         if(s==null) return;
         if(s==current) current = null;
         figures.remove(s);
         repaint();
     }
+
+    /**
+     * reduce the delays of the timers
+     */
 
     private void reduceDelays() {
         delay -= 10;
@@ -112,21 +149,42 @@ public class GameComponent extends JComponent implements ActionListener {
         timer.setDelay(delay);
         if (deleterDelay <= 250)
             deleterDelay = 250;
-        shapesDeleter.deleter.setDelay(deleterDelay);
+        deleter.setDelay(deleterDelay);
     }
+
+    /**
+     * run the timer responsible for deleting figures
+     */
+
+    private void initDeleter() {
+        if(!figures.isEmpty()) {
+            figures.remove(0);
+            figures.trimToSize();
+        }
+        repaint();
+    }
+
+    /**
+     * action performed by the main timer
+     * @param e required by definition
+     */
 
     @Override
     public void actionPerformed(ActionEvent e) {
         this.rollShapes();
         figures.add(invisible.get(getRandomNumber(2)));
         if(player.getMisses()>=10) {
-            this.timer.stop();
-            this.shapesDeleter.getDeleter().stop();
+            timer.stop();
+            deleter.stop();
         }
         repaint();
     }
 
-    public class MouseComponent extends MouseAdapter {
+    /**
+     * Inner class for mouse actions;
+     */
+
+    private class MouseComponent extends MouseAdapter {
 
         @Override
         public void mousePressed(MouseEvent e) {
@@ -138,38 +196,15 @@ public class GameComponent extends JComponent implements ActionListener {
                     }
                     else
                         player.setScore(-5);
-                        player.setNewRecord();
+                    player.setNewRecord();
                     reduceDelays();
                     removeShape(current);
                 } else
                     player.countMisses();
-            } else if(rectangle.contains(e.getPoint())) {
+            } else if(button.contains(e.getPoint())) {
                 startGame();
                 repaint();
             }
-        }
-    }
-
-    public class ShapesDeleter implements ActionListener {
-
-        private Timer deleter;
-
-        public ShapesDeleter() {
-            deleter = new Timer(deleterDelay, this);
-            deleter.start();
-        }
-
-        public Timer getDeleter() {
-            return this.deleter;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if(figures.isEmpty()==false) {
-                figures.remove(0);
-                figures.trimToSize();
-            }
-            repaint();
         }
     }
 }

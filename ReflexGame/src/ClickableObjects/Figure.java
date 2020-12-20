@@ -12,6 +12,13 @@ abstract public class Figure {
     protected int height;
     protected Shape shape;
 
+    /**
+     * Create new Figure
+     * @param color circle's color
+     * @param width circle's width
+     * @param height circle's height
+     */
+
     public Figure(Color color, int width, int height) {
         this.color = color;
         this.width = width;
