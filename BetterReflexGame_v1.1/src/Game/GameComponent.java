@@ -19,16 +19,16 @@ public class GameComponent extends JComponent implements ActionListener {
     private ArrayList<Figure> figures;
     private Figure currentFigure;
 
-    private Rectangle rectangle = new Rectangle(250, 280, 100, 25);
+    private final Rectangle area;
 
-    private Color[] colors = {Color.BLUE, Color.RED};
+    private final Color[] colors = {Color.BLUE, Color.RED};
     private Player player;
 
     private int delay;
     private int deleterDelay;
 
     private Timer timer;
-    private ShapesDeleter shapesDeleter;
+    private Timer figuresDeleter;
 
     public GameComponent() {
 
@@ -36,12 +36,13 @@ public class GameComponent extends JComponent implements ActionListener {
 
         figures = new ArrayList<>();
         invisible = new ArrayList<>();
+        area = new Rectangle(250, 280, 100, 25);
 
         delay = 1000;
         deleterDelay = 1300;
 
         timer = new Timer(delay, this);
-        shapesDeleter = new ShapesDeleter();
+        figuresDeleter = new Timer(delay,event -> initDeleter());
 
         player = new Player();
         startGame();
@@ -52,11 +53,12 @@ public class GameComponent extends JComponent implements ActionListener {
         player.resetStats();
         figures.clear();
         timer.start();
-        shapesDeleter.getDeleter().start();
+        figuresDeleter.start();
     }
 
     @Override
     public void paintComponent(Graphics graphic) {
+
         Graphics2D graphics2D = (Graphics2D) graphic;
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -65,6 +67,7 @@ public class GameComponent extends JComponent implements ActionListener {
 
         if(timer.isRunning()) {
             graphics2D.drawString("Score: " + player.getScore(), 10, 50);
+
             for (Figure figure : figures) {
                 graphics2D.setColor(figure.getColor());
                 graphics2D.fill(figure.getShape());
@@ -72,19 +75,21 @@ public class GameComponent extends JComponent implements ActionListener {
             }
         } else {
             graphics2D.drawString("GAME OVER", 250, 250);
-            graphics2D.draw(rectangle);
+            graphics2D.draw(area);
             graphics2D.drawString("start again", 250, 300);
             graphics2D.drawString("record: "+player.getRecord(), 250, 325);
         }
     }
 
     private void rollShapes() {
+
         invisible.clear();
         invisible.add(new Square(getRandomColor(), 50,50));
         invisible.add(new Circle(getRandomColor(), 50,50));
     }
 
     private int getRandomNumber(int limit) {
+
         Random random = new Random();
         return random.nextInt(limit);
     }
@@ -103,15 +108,18 @@ public class GameComponent extends JComponent implements ActionListener {
     }
 
     private void removeShape(Figure figure) {
+
         if(figure==null)
             return;
         else if(figure== currentFigure)
             currentFigure = null;
+
         figures.remove(figure);
         repaint();
     }
 
     private void reduceDelays() {
+
         delay -= 10;
         deleterDelay -= 10;
 
@@ -121,25 +129,40 @@ public class GameComponent extends JComponent implements ActionListener {
 
         if (deleterDelay <= 250)
             deleterDelay = 250;
-        shapesDeleter.deleter.setDelay(deleterDelay);
+        figuresDeleter.setDelay(deleterDelay);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        this.rollShapes();
-        figures.add(invisible.get(getRandomNumber(2)));
+    private void initDeleter() {
 
-        if(player.getMisses()>=10) {
-            this.timer.stop();
-            this.shapesDeleter.getDeleter().stop();
+        if(!(figures.isEmpty())) {
+            figures.remove(0);
+            figures.trimToSize();
         }
         repaint();
     }
 
-    public class MouseComponent extends MouseAdapter {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        rollShapes();
+        figures.add(invisible.get(getRandomNumber(2)));
+
+        if(player.getMisses()>=10) {
+            timer.stop();
+            figuresDeleter.stop();
+        }
+        repaint();
+    }
+
+    /**
+     * Inner class
+     */
+
+    private class MouseComponent extends MouseAdapter {
 
         @Override
         public void mousePressed(MouseEvent event) {
+
             if(timer.isRunning()) {
                 currentFigure = find(event.getPoint());
 
@@ -155,33 +178,11 @@ public class GameComponent extends JComponent implements ActionListener {
                 } else
                     player.countMisses();
 
-            } else if(rectangle.contains(event.getPoint())) {
+            } else if(area.contains(event.getPoint())) {
                 startGame();
                 repaint();
             }
         }
-    }
 
-    public class ShapesDeleter implements ActionListener {
-
-        private Timer deleter;
-
-        public ShapesDeleter() {
-            deleter = new Timer(deleterDelay, this);
-            deleter.start();
-        }
-
-        public Timer getDeleter() {
-            return this.deleter;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if(!(figures.isEmpty())) {
-                figures.remove(0);
-                figures.trimToSize();
-            }
-            repaint();
-        }
     }
 }
